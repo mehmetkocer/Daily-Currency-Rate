@@ -104,10 +104,10 @@ jobs:
     name: Deploy to Development
     runs-on: ubuntu-latest
     needs: [build, test]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' # Auto-deploy on merge to main
+    if: false # Auto-deploy on merge to main - DISABLED
     environment:
       name: development
-      url: ${{ secrets.DEV_APP_URL }}
+      # url: ${{ secrets.DEV_APP_URL }} # Disabled as job is not run
 
     steps:
       - name: Checkout code (for docker-compose.yml)
@@ -201,10 +201,10 @@ jobs:
     name: Deploy to Production (Manual)
     runs-on: ubuntu-latest
     needs: [build, test]
-    if: github.event_name == 'workflow_dispatch' # Manual trigger only
+    if: false # Manual trigger only - DISABLED
     environment:
       name: production
-      url: ${{ secrets.PROD_APP_URL }}
+      # url: ${{ secrets.PROD_APP_URL }} # Disabled as job is not run
 
     steps:
       - name: Checkout code (for docker-compose.yml)

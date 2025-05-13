@@ -2,8 +2,6 @@
 
 This project is a Python application that fetches daily currency exchange rates from the [currencyapi.net](https://currencyapi.net) API and stores them in a PostgreSQL database. The application is containerized using Docker and managed with Docker Compose. It includes a CI/CD pipeline using GitHub Actions for automated building and testing.
 
-For a detailed explanation of the architecture, design decisions, and setup instructions, please see the [Solution Design Document](SOLUTION_DESIGN.md).
-
 ## Features
 
 *   Daily fetching of currency rates (scheduled for 06:00 UTC).
@@ -147,7 +145,9 @@ Tests are written using `pytest`.
 
 ## CI/CD Pipeline
 
-The project uses GitHub Actions for CI/CD, defined in `.github/workflows/ci_cd.yml`. The pipeline automates building, testing, and deploying the application. It includes the following jobs:
+The project uses GitHub Actions for CI/CD, defined in `.github/workflows/ci_cd.yml`. The pipeline is configured to automatically build the Docker image and run tests. Deployment job definitions for development and production environments are included as a demonstration of deployment practices but are currently **disabled** in the workflow.
+
+The pipeline includes the following jobs:
 
 *   **Build Job (`build`):**
     *   Builds the Docker image for the Python application.
@@ -160,10 +160,10 @@ The project uses GitHub Actions for CI/CD, defined in `.github/workflows/ci_cd.y
     *   Installs Python dependencies.
     *   Executes both unit tests and integration tests using `pytest`.
 
-*   **Deploy to Development Job (`deploy_development`):**
-    *   Runs after successful `build` and `test` jobs.
-    *   Automatically triggers on pushes to the `main` branch.
-    *   Deploys the application to a development server. This involves:
+*   **Deploy to Development Job (`deploy_development`) - (Demonstration Only, Currently Disabled):**
+    *   This job is defined to run after successful `build` and `test` jobs.
+    *   **Currently, this job is disabled in the workflow (`if: false`).**
+    *   If enabled, it would deploy the application to a development server. The defined steps include:
         *   Setting up SSH to the development server.
         *   Copying the `docker-compose.yml` file.
         *   Creating an `.env` file on the server with development-specific configurations.
@@ -172,11 +172,6 @@ The project uses GitHub Actions for CI/CD, defined in `.github/workflows/ci_cd.y
         *   Running `docker-compose up` to start/update the application.
         *   Pruning old Docker images.
 
-*   **Deploy to Production Job (`deploy_production`):**
-    *   Runs after successful `build` and `test` jobs.
-    *   Triggered manually via `workflow_dispatch`.
-    *   Deploys the application to a production server. The process is similar to the development deployment but uses production-specific configurations and server details.
-
-## Detailed Documentation
-
-For more in-depth information on the project's architecture, setup, deployment, and design decisions, please refer to the [SOLUTION_DESIGN.md](SOLUTION_DESIGN.md) file.
+*   **Deploy to Production Job (`deploy_production`) - (Demonstration Only, Currently Disabled):**
+    *   This job is defined to run after successful `build` and `test` jobs.
+    *   **Currently, this job is disabled in the workflow (`if: false`).**
