@@ -7,9 +7,6 @@ on:
     branches: [ main ]
   workflow_dispatch: # Allows manual triggering, primarily for production deployment
 
-env:
-  IMAGE_NAME_BASE: ${{ github.repository_owner }}/${{ github.event.repository.name }}
-
 jobs:
   build:
     name: Build and Push Docker Image
@@ -32,6 +29,12 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert repository name to lowercase
+        id: string_ops
+        run: |
+          repo_name="${{ github.event.repository.name }}"
+          echo "LOWERCASE_REPO_NAME=${repo_name,,}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         id: build_and_push
         uses: docker/build-push-action@v5
@@ -40,8 +43,8 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }} # Push on merge to main or manual trigger
           tags: |
-            ghcr.io/${{ env.IMAGE_NAME_BASE }}:latest
-            ghcr.io/${{ env.IMAGE_NAME_BASE }}:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.LOWERCASE_REPO_NAME }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ env.LOWERCASE_REPO_NAME }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -139,7 +142,7 @@ jobs:
           
           # Deployment details
           IMAGE_TAG: ${{ github.sha }}
-          FULL_IMAGE_NAME: ghcr.io/${{ env.IMAGE_NAME_BASE }}
+          FULL_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ env.LOWERCASE_REPO_NAME }} # Use lowercase name
           SERVER_USER_AT_HOST: ${{ secrets.DEV_SERVER_USERNAME }}@${{ secrets.DEV_SERVER_HOST }}
           APP_PATH: /opt/daily-currency-rate-dev 
           COMPOSE_FILE_PATH: ${{ github.workspace }}/docker-compose.yml
@@ -236,7 +239,7 @@ jobs:
           
           # Deployment details
           IMAGE_TAG: ${{ github.sha }} # Uses the SHA of the commit that triggered the manual run
-          FULL_IMAGE_NAME: ghcr.io/${{ env.IMAGE_NAME_BASE }}
+          FULL_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/${{ env.LOWERCASE_REPO_NAME }} # Use lowercase name
           SERVER_USER_AT_HOST: ${{ secrets.PROD_SERVER_USERNAME }}@${{ secrets.PROD_SERVER_HOST }}
           APP_PATH: /opt/daily-currency-rate-prod
           COMPOSE_FILE_PATH: ${{ github.workspace }}/docker-compose.yml
