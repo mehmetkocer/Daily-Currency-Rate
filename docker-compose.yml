@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine # Using alpine for a smaller image size
+    container_name: daily_currency_db
+    environment:
+      POSTGRES_USER: ${DB_USER:-user} # Default to 'user' if not set in .env
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # Default to 'password' if not set in .env
+      POSTGRES_DB: ${DB_NAME:-currency_data} # Default to 'currency_data' if not set in .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT_HOST:-5432}:5432" # Expose DB port to host, configurable via .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-user} -d $${POSTGRES_DB:-currency_data}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: daily_currency_app
+    depends_on:
+      db:
+        condition: service_healthy # Wait for db to be healthy
+    environment:
+      # Pass database connection details to the application
+      DB_HOST: db # Service name 'db' is resolvable within Docker network
+      DB_PORT: 5432 # Standard PostgreSQL port inside the Docker network
+      DB_NAME: ${DB_NAME:-currency_data}
+      DB_USER: ${DB_USER:-user}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      # Pass the API key
+      CURRENCY_API_KEY: ${CURRENCY_API_KEY} # This MUST be set in the .env file
+      # Control application behavior (schedule or run_once)
+      SCRIPT_MODE: ${SCRIPT_MODE:-schedule} # Default to 'schedule'
+      # Python specific environment variables
+      PYTHONUNBUFFERED: 1 # Ensures print statements and logs are sent straight to terminal
+      PYTHONIOENCODING: UTF-8
+    volumes:
+      # Mount the application code for development (optional, comment out for production-like build)
+      # This allows code changes without rebuilding the image during development.
+      # For production, the code is copied into the image via Dockerfile's COPY instruction.
+      - ./app:/usr/src/app/app
+    restart: unless-stopped
+    # If you need to run commands after the container starts, e.g., migrations (not used here)
+    # command: >
+    #   sh -c "python manage.py migrate &&
+    #          python -m app.main"
+
+volumes:
+  postgres_data: # Defines the named volume for data persistence
+
+# Note on .env file:
+# Create a .env file in the same directory as docker-compose.yml with your actual values:
+# DB_USER=myuser
+# DB_PASSWORD=mypassword
+# DB_NAME=mydb
+# CURRENCY_API_KEY=yourapikey
+# DB_PORT_HOST=5433 # Optional: if you want to map host port 5433 to container port 5432
+# SCRIPT_MODE=run_once # Optional: to run the job once and exit
