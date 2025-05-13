@@ -20,20 +20,13 @@ For a detailed explanation of the architecture, design decisions, and setup inst
 ├── .github/workflows/         # GitHub Actions CI/CD pipeline
 │   └── ci_cd.yml
 ├── app/                       # Core Python application logic
-│   ├── __init__.py
 │   ├── currency_fetcher.py    # Fetches data from currency API
 │   ├── db_manager.py          # Manages database interactions
 │   └── main.py                # Main application script with scheduler
-├── notes/                     # Project planning and progress (not part of runtime)
-│   ├── progress.md
-│   └── project_plan.md
 ├── tests/                     # Unit and integration tests
-│   ├── __init__.py
 │   ├── integration/
-│   │   ├── __init__.py
 │   │   └── test_app_flow.py
 │   └── unit/
-│       ├── __init__.py
 │       ├── test_currency_fetcher.py
 │       ├── test_db_manager.py
 │       └── test_main.py
@@ -43,8 +36,6 @@ For a detailed explanation of the architecture, design decisions, and setup inst
 ├── Dockerfile                 # Dockerfile for the Python application
 ├── README.md                  # This file
 ├── requirements.txt           # Python dependencies
-├── SOLUTION_DESIGN.md         # Detailed solution architecture and guide
-├── task-description.md        # Original task requirements
 └── pytest.ini                 # Pytest configuration
 ```
 
